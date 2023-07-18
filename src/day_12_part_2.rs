@@ -1,3 +1,6 @@
+use std::sync::mpsc::sync_channel;
+use std::sync::Arc;
+use std::thread;
 use std::{collections::VecDeque, ops::Index};
 #[derive(Clone)]
 pub struct Matrix<T> {
@@ -43,16 +46,21 @@ fn main() {
         })
     });
     let grid: Matrix<u8> = Matrix::new(rows, columns, grid_data);
-    // println!("Starting Grid:");
-    // for r in 0..rows {
-    //     for c in 0..columns {
-    //         print!("{} ", grid.index((r, c)));
-    //     }
-    //     println!();
-    // }
+
     let mut path_lengths: Vec<usize> = vec![];
+
+    let grid_mutex = Arc::new(grid);
+    let (tx, rx) = sync_channel(starting_points.len());
     for start in starting_points {
-        let p = bfs(grid.clone(), start);
+        let grid_arc = Arc::clone(&grid_mutex);
+        let tx = tx.clone();
+        thread::spawn(move || {
+            let p = bfs(grid_arc, start);
+            tx.send(p).unwrap();
+        });
+    }
+    drop(tx);
+    while let Ok(p) = rx.recv() {
         if p > 0 {
             path_lengths.push(p);
         }
@@ -61,7 +69,7 @@ fn main() {
     println!("{}", path_lengths[0]);
 }
 
-fn bfs(grid: Matrix<u8>, starting_point: (usize, usize)) -> usize {
+fn bfs(grid: Arc<Matrix<u8>>, starting_point: (usize, usize)) -> usize {
     let mut queue: VecDeque<(usize, usize, usize)> = VecDeque::new();
 
     queue.push_front((starting_point.0, starting_point.1, 0));
@@ -115,7 +123,7 @@ fn can_move(
     current_height: &u8,
     next_position: (usize, usize),
     visited: Vec<Vec<bool>>,
-    grid: Matrix<u8>,
+    grid: Arc<Matrix<u8>>,
 ) -> bool {
     let mut next_height = *grid.index(next_position);
     if next_height == b'E' {
