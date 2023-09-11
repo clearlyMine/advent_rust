@@ -1,13 +1,16 @@
 use nom::bytes::complete::{tag, take_until};
 use nom::*;
 use std::collections::HashMap;
+use std::time::Instant;
 
 fn main() {
-    let input = include_str!("../inputs/day21.txt");
+    let time_start = Instant::now();
+    let input = include_str!("../../inputs/day21.txt");
     let res1 = process_part_1(input);
     println!("Part 1: {}", res1);
     let res2 = process_part_2(input);
     println!("Part 2: {}", res2);
+    println!("Time: {}μs", time_start.elapsed().as_micros());
 }
 
 fn process_part_1(input: &str) -> isize {

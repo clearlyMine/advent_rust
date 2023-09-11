@@ -1,15 +1,20 @@
-use std::collections::HashMap;
-
 use itertools::Itertools;
+use std::collections::HashMap;
+use std::time::Instant;
 
 fn main() {
-    let input = include_str!("../inputs/day17.txt");
+    let time_start = Instant::now();
+    let input = include_str!("../../inputs/day17.txt");
     let mut lines = input.lines();
     let line = lines.next().unwrap();
     let res1 = process_part_1(line);
     println!("Part 1:{}", res1);
+    println!("Time: {}μs", time_start.elapsed().as_micros());
+
+    let time_start = Instant::now();
     let res2 = process_part_2(line);
     println!("Part 2:{}", res2);
+    println!("Time: {}μs", time_start.elapsed().as_micros());
 }
 
 //NOTE: Coordinates are in the form (y,x)

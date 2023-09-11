@@ -1,9 +1,12 @@
 use std::collections::HashMap;
+use std::time::Instant;
 
 fn main() {
-    let input = include_str!("../inputs/day25.txt");
+    let time_start = Instant::now();
+    let input = include_str!("../../inputs/day25.txt");
     let res1 = process_part_1(input);
     println!("Part 1: {}", res1);
+    println!("Time: {}μs", time_start.elapsed().as_micros());
 }
 
 fn process_part_1(input: &str) -> String {
@@ -123,7 +126,7 @@ mod tests {
 
     #[test]
     fn test_process_part_1() {
-        let input = include_str!("../inputs/day25_sample.txt");
+        let input = include_str!("../../inputs/day25_sample.txt");
         assert_eq!(process_part_1(input), "2=-1=0");
     }
 

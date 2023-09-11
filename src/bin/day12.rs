@@ -1,14 +1,20 @@
 use std::sync::mpsc::sync_channel;
 use std::sync::Arc;
 use std::thread;
+use std::time::Instant;
 use std::{collections::VecDeque, ops::Index};
 
 fn main() {
-    let input = include_bytes!("../inputs/day12.txt");
+    let time_start = Instant::now();
+    let input = include_bytes!("../../inputs/day12.txt");
     let res1 = process_part_1(input);
     println!("Part 1: {:?}", res1);
+    println!("Time: {}μs", time_start.elapsed().as_micros());
+
+    let time_start = Instant::now();
     let res2 = process_part_2(input);
     println!("Part 2: {:?}", res2);
+    println!("Time: {}ms", time_start.elapsed().as_millis());
 }
 
 #[derive(Clone)]

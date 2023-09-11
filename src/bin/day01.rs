@@ -1,7 +1,8 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Instant};
 
 fn main() {
-    let input = include_str!("../inputs/day1.txt");
+    let time_start = Instant::now();
+    let input = include_str!("../../inputs/day1.txt");
 
     let mut elves_calories: HashMap<i32, i32> = HashMap::new();
     // Consumes the iterator, returns an (Optional) String
@@ -20,8 +21,12 @@ fn main() {
     }
     let res1 = process_part_1(elves_calories.clone());
     println!("Part 1: {:?}", res1);
+    println!("Time: {}μs", time_start.elapsed().as_micros());
+
+    let time_start = Instant::now();
     let res2 = process_part_2(elves_calories);
     println!("Part 2: {:?}", res2);
+    println!("Time: {}μs", time_start.elapsed().as_micros());
 }
 
 fn process_part_1(elves_calories: HashMap<i32, i32>) -> i32 {

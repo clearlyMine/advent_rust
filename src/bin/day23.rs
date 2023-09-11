@@ -1,11 +1,17 @@
 use std::collections::HashMap;
+use std::time::Instant;
 
 fn main() {
-    let input = include_str!("../inputs/day23.txt");
+    let time_start = Instant::now();
+    let input = include_str!("../../inputs/day23.txt");
     let res1 = process_part_1(input, 10);
     println!("Part 1: {}", res1);
+    println!("Time: {}ms", time_start.elapsed().as_millis());
+
+    let time_start = Instant::now();
     let res2 = process_part_2(input);
     println!("Part 2: {}", res2);
+    println!("Time: {}sec", time_start.elapsed().as_secs());
 }
 
 fn process_part_1(input: &str, rounds: usize) -> usize {
@@ -399,7 +405,7 @@ mod tests {
 
     #[test]
     fn test_process_part_2() {
-        let input = include_str!("../inputs/day23_sample.txt");
+        let input = include_str!("../../inputs/day23_sample.txt");
         assert_eq!(process_part_2(input), 20);
     }
     //

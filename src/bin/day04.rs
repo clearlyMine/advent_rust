@@ -1,14 +1,20 @@
+use std::time::Instant;
 struct Range {
     start: i32,
     end: i32,
 }
 
 fn main() {
-    let input = include_str!("../inputs/day4.txt");
+    let time_start = Instant::now();
+    let input = include_str!("../../inputs/day4.txt");
     let res1 = process_part_1(input);
     println!("Part 1: {}", res1);
+    println!("Time: {}μs", time_start.elapsed().as_micros());
+
+    let time_start = Instant::now();
     let res2 = process_part_2(input);
     println!("Part 2: {:?}", res2);
+    println!("Time: {}μs", time_start.elapsed().as_micros());
 }
 
 fn process_part_1(input: &str) -> usize {

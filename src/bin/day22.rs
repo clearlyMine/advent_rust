@@ -1,16 +1,21 @@
-use std::collections::HashMap;
-//
 use nom::{
     character::{self, complete::alpha1},
     combinator, IResult,
 };
+use std::collections::HashMap;
+use std::time::Instant;
 
 fn main() {
-    let input = include_str!("../inputs/day22.txt");
+    let time_start = Instant::now();
+    let input = include_str!("../../inputs/day22.txt");
     let res1 = process_part_1(input);
     println!("Part 1: {}", res1);
+    println!("Time: {}ms", time_start.elapsed().as_millis());
+
+    let time_start = Instant::now();
     let res2 = process_part_2(input);
     println!("Part 2: {}", res2);
+    println!("Time: {}ms", time_start.elapsed().as_millis());
 }
 
 fn process_part_1(input: &str) -> usize {
@@ -478,7 +483,7 @@ mod tests {
 
     #[test]
     fn test_process_part_2() {
-        let input = include_str!("../inputs/day22.txt");
+        let input = include_str!("../../inputs/day22.txt");
         assert_eq!(process_part_2(input), 55364);
     }
     //
