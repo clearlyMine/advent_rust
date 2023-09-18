@@ -33,7 +33,7 @@ fn to_snafu(decimal: isize, ranges: HashMap<u128, Range>) -> String {
     let order: i128 = 5;
     let mut remaining = remaining as i128;
     let max_digits = max_digits as u32;
-    dbg!(max_digits);
+    // dbg!(max_digits);
     for j in (1..max_digits).rev() {
         let range_of_next = ranges.get(&(j.saturating_sub(1) as u128));
         let last_max = range_of_next.unwrap().max as i128;
