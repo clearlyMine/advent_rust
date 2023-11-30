@@ -1,0 +1,157 @@
+--20230919T141015--
+day01:
+Part 1: 69836
+Time: 278╬╝s
+Part 2: 207968
+Time: 2╬╝s
+
+day02:
+Part 1: 10404
+Time: 67╬╝s
+Part 2: 10334
+Time: 38╬╝s
+
+day03:
+Part 1: 8123
+Time: 61╬╝s
+Part 2: 2620
+Time: 59╬╝s
+
+day04:
+Part 1: 431
+Time: 257╬╝s
+Part 2: 823
+Time: 234╬╝s
+
+day05:
+Part 1: "SBPQRSCDF"
+Time: 197╬╝s
+Part 2: "RGLVRCQSB"
+Time: 201╬╝s
+
+day06:
+Part 1: 1953
+Time: 128╬╝s
+Part 2: 2301
+Time: 169╬╝s
+
+day07:
+Part 1: 1423358
+Time: 107╬╝s
+Part 2: 545729
+Time: 98╬╝s
+
+day08:
+Part 1: 1693
+Time: 351╬╝s
+Part 2: 422059
+Time: 337╬╝s
+
+day09:
+Part 1: 6314
+Time: 637╬╝s
+Part 2: 2504
+Time: 567╬╝s
+
+day10:
+Part 1: 14520
+Time: 48╬╝s
+Part 2: 
+###..####.###...##..####.####...##.###..
+#..#....#.#..#.#..#....#.#.......#.#..##
+#..#...#..###..#......#..###.....#.###..
+###...#...#..#.#.##..#...#.......#.#..#.
+#....#....#..#.#..#.#....#....#..#.#..#.
+#....####.###...###.####.####..##..###..
+
+Time: 37╬╝s
+
+day11:
+Part 1: 54036
+Time: 347╬╝s
+Part 2: 13237873355
+Time: 23842╬╝s
+
+day12:
+Part 1: 490
+Time: 85725╬╝s
+Part 2: 488
+Time: 2375960╬╝s
+
+day13:
+Part 1: 4734
+Time: 2912╬╝s
+Part 2: 21836
+Time: 14408╬╝s
+
+day14:
+Part 1: 1133
+Time: 477╬╝s
+Part 2: 27566
+Time: 5794╬╝s
+
+day15:
+Part 1:5142231
+Time: 553474╬╝s
+Part 2:10884459367718
+Time: 1271144╬╝s
+
+day16:
+Part 1:1944
+Time: 394183╬╝s
+Part 2:2679
+Time: 8892281╬╝s
+
+day17:
+Part 1:3083
+Time: 781╬╝s
+Part 2:1532183908048
+Time: 2111╬╝s
+
+day18:
+Part 1:4482
+Time: 20665╬╝s
+Part 2:2576
+Time: 7538╬╝s
+
+day19:
+Part 1:1675
+Time: 381066╬╝s
+Part 2:6840
+Time: 4980805╬╝s
+
+day20:
+Part 1: 19070
+Time: 10312╬╝s
+Part 2:14773357352059
+Time: 101134╬╝s
+
+day21:
+Part 1: 104272990112064
+Time: 1695╬╝s
+Part 2: 3220993874133
+Time: 3368╬╝s
+
+day22:
+Part 1: 191010
+Time: 441268╬╝s
+Part 2: 55364
+Time: 405189╬╝s
+
+day23:
+Part 1: 3923
+Time: 11791╬╝s
+Part 2: 1019
+Time: 23272032╬╝s
+
+day24:
+Part 1: 238
+Time: 8825880╬╝s
+Part 2: 751
+Time: 27433427╬╝s
+
+day25:
+Part 1: 2==221=-002=0-02-000
+Time: 278╬╝s
+
+Total time: 79sec

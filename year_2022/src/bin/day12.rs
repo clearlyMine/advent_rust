@@ -14,7 +14,7 @@ fn main() {
     let time_start = Instant::now();
     let res2 = process_part_2(input);
     println!("Part 2: {:?}", res2);
-    println!("Time: {}ms", time_start.elapsed().as_millis());
+    println!("Time: {}μs", time_start.elapsed().as_micros());
 }
 
 #[derive(Clone)]

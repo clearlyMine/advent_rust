@@ -1,0 +1,252 @@
+use std::collections::BTreeMap;
+
+fn main() {
+    let input = include_str!("../input_day_24_sample.txt");
+    let res1 = process_part_1(input);
+    println!("Part 1: {}", res1);
+    let res2 = process_part_2(input);
+    println!("Part 2: {}", res2);
+}
+
+fn process_part_1(input: &str) -> usize {
+    let grid: BTreeMap<Coord, Vec<Tile>> = parse_input(input);
+               display_grid(&grid);
+    //recursive function with an option return type
+    //recursively go through all currently available spots
+    //changing the current position to the new position
+    //if a blizzard moves in the current position then return None
+    //if nothing happens then continue recursively moving until the end_point is
+    //reached
+    //for all the returned counts keep comparing the Some values and return the lowest score
+    let max_row = grid.iter().map(|(coord, _)| coord.row).max().unwrap();
+    let max_col = grid.iter().map(|(coord, _)| coord.col).max().unwrap();
+
+    let starting_position: Vec<&Coord> = grid
+        .iter()
+        .filter(|(coord, tile)| coord.row == 0 && tile[0] == Tile::Ground)
+        .map(|(coord, _)| coord)
+        .collect();
+    if starting_position.len() > 1 {
+        panic!();
+    }
+    let starting_position = starting_position.iter().last().unwrap();
+    let destination: Vec<&Coord> = grid
+        .iter()
+        .filter(|(coord, tile)| coord.row == max_row && tile[0] == Tile::Ground)
+        .map(|(coord, _)| coord)
+        .collect();
+    if destination.len() > 1 {
+        panic!();
+    }
+    let destination = destination.iter().last().unwrap();
+    dbg!(starting_position);
+    dbg!(destination);
+    if let Some(x) = find_path(grid.clone(), **starting_position, **destination, 0) {
+        return x;
+    } else {
+        panic!();
+    }
+}
+
+fn find_path(
+    grid: BTreeMap<Coord, Vec<Tile>>,
+    current_position: Coord,
+    destination: Coord,
+    round: usize,
+) -> Option<usize> {
+    if current_position == destination {
+        return Some(round);
+    }
+    //move all blizzards
+    let mut grid = make_blizzards_move(grid);
+
+    display_grid(&grid);
+
+    None
+}
+
+fn make_blizzards_move(grid: BTreeMap<Coord, Vec<Tile>>) -> BTreeMap<Coord, Vec<Tile>> {
+    let mut grid = grid;
+    let mut proposed_moves: Vec<(Coord, Coord, Tile)> = vec![];
+    for (coord, tiles) in grid.clone(){
+        for tile in tiles {
+            let next_coord: Coord;
+            match tile {
+                Tile::Blizzard(direction) => next_coord = get_next_coord(coord, direction, &grid),
+                _ => continue,
+            }
+            proposed_moves.push((coord, next_coord, tile));
+        }
+    }
+    for (from,to,tile) in proposed_moves{
+        let tiles = grid.get(&from).unwrap();
+        let mut remaining_tiles: Vec<Tile> = tiles.clone();
+        if let Some(index) = tiles.iter().position(|&t| t == tile) {
+            remaining_tiles.remove(index);
+        }
+        if remaining_tiles.is_empty(){
+            remaining_tiles = vec![Tile::Ground];
+        }
+        grid.insert(from,remaining_tiles);
+
+        let tiles = grid.get(&to).unwrap();
+        let mut new_tiles: Vec<Tile> = tiles.clone();
+        if tiles[0]==Tile::Ground{
+            new_tiles = vec![tile];
+        }else{
+            //can only be blizzard
+            new_tiles.push(tile);
+        }
+        grid.insert(to, new_tiles);
+
+    }
+
+
+    grid
+}
+
+fn get_next_coord(
+    current: Coord,
+    direction: Direction,
+    grid: &BTreeMap<Coord, Vec<Tile>>,
+) -> Coord {
+    let max_non_wall_row = grid.iter().map(|(coord, _)| coord.row).max().unwrap() - 1;
+    let max_non_wall_col = grid.iter().map(|(coord, _)| coord.col).max().unwrap() - 1;
+    let row = current.row;
+    let col = current.col;
+    match direction {
+        Direction::North => {
+            if row == 1 {
+                Coord::new(max_non_wall_row, col)
+            } else {
+                Coord::new(row - 1, col)
+            }
+        }
+        Direction::South => {
+            if row == max_non_wall_col {
+                Coord::new(1, col)
+            } else {
+                Coord::new(row + 1, col)
+            }
+        }
+        Direction::East => {
+            if col == max_non_wall_col {
+                Coord::new(row, max_non_wall_col)
+            } else {
+                Coord::new(row, col + 1)
+            }
+        }
+        Direction::West => {
+            if col == 1 {
+                Coord::new(row, max_non_wall_col)
+            } else {
+                Coord::new(row, col - 1)
+            }
+        }
+    }
+}
+
+fn process_part_2(input: &str) -> usize {
+    let grid = parse_input(input);
+    0
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+enum Tile {
+    Wall,
+    Ground,
+    Blizzard(Direction),
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+enum Direction {
+    North,
+    South,
+    West,
+    East,
+}
+
+#[derive(Debug, Copy, Clone, PartialOrd, Ord, PartialEq, Eq, Hash)]
+struct Coord {
+    row: usize,
+    col: usize,
+}
+
+impl Coord {
+    fn new(row: usize, col: usize) -> Coord {
+        Coord { row, col }
+    }
+
+    fn get_next_coord(&self, direction: Direction, grid: &mut BTreeMap<Coord, Vec<Tile>>) -> Coord {
+        todo!()
+    }
+}
+
+fn display_grid(grid: &BTreeMap<Coord, Vec<Tile>>) {
+    let max_row = grid.iter().map(|(coord, _)| coord.row).max().unwrap();
+    let max_col = grid.iter().map(|(coord, _)| coord.col).max().unwrap();
+    for row in 0..=max_row {
+        for col in 0..=max_col {
+            let coord = Coord { row, col };
+            if let Some(elements) = grid.get(&coord) {
+                if elements.len() == 1 {
+                    let element = elements[0];
+                    match element {
+                        Tile::Ground => print!("."),
+                        Tile::Wall => print!("#"),
+                        Tile::Blizzard(Direction::North) => print!("^"),
+                        Tile::Blizzard(Direction::South) => print!("v"),
+                        Tile::Blizzard(Direction::East) => print!(">"),
+                        Tile::Blizzard(Direction::West) => print!("<"),
+                    }
+                } else {
+                    print!("{}", elements.len());
+                }
+            } else {
+                break;
+            }
+        }
+        println!();
+    }
+}
+
+fn parse_input(input: &str) -> BTreeMap<Coord, Vec<Tile>> {
+    let mut grid: BTreeMap<Coord, Vec<Tile>> = BTreeMap::new();
+    let mut row = 0;
+    for line in input.lines() {
+        let mut col = 0;
+        for char in line.chars() {
+            let coord = Coord::new(row, col);
+            let tile = match char {
+                '.' => Tile::Ground,
+                '#' => Tile::Wall,
+                '^' => Tile::Blizzard(Direction::North),
+                'v' => Tile::Blizzard(Direction::South),
+                '>' => Tile::Blizzard(Direction::East),
+                '<' => Tile::Blizzard(Direction::West),
+                _ => panic!(),
+            };
+            col += 1;
+            grid.insert(coord, vec![tile]);
+        }
+        row += 1;
+    }
+    grid
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_process_part_1() {
+        let input = include_str!("../input_day_24_sample.txt");
+        assert_eq!(process_part_1(input), 18);
+    }
+
+    #[test]
+    fn test_process_part_2() {
+        let input = include_str!("../input_day_24_sample.txt");
+        assert_eq!(process_part_2(input), 20);
+    }
+}

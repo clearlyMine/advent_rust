@@ -12,6 +12,13 @@ atoi = "2"
 nom = "7"
 itertools = "0.11.0"
 
+[dev-dependencies]
+criterion = { version = "0.5.1", features = ["html_reports"] }
+
+[[bench]]
+name = "benchmark_all_days"
+harness = false
+
 
 [[bin]]
 name = "main"

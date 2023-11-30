@@ -36,7 +36,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             .args(["run", "--release", "--bin", day])
             .output()?;
         let output = String::from_utf8(cmd.stdout)?;
-        println!("Day {}:\n{}", day, output);
+        println!("{}:\n{}", day, output);
         total_time += extract_microseconds(&output);
     }
     println!("Total time: {}sec", total_time / 1000 / 1000);

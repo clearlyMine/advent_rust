@@ -13,12 +13,12 @@ fn main() {
     let input = include_str!("../../inputs/day15.txt");
     let res1 = process_part_1(input, 2_000_000);
     println!("Part 1:{}", res1);
-    println!("Time: {}ms", time_start.elapsed().as_millis());
+    println!("Time: {}μs", time_start.elapsed().as_micros());
 
     let time_start = Instant::now();
     let res2 = process_part_2(input);
     println!("Part 2:{}", res2);
-    println!("Time: {}ms", time_start.elapsed().as_millis());
+    println!("Time: {}μs", time_start.elapsed().as_micros());
 }
 
 fn process_part_1(input: &str, row: i32) -> u32 {
