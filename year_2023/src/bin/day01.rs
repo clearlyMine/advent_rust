@@ -35,41 +35,53 @@ fn process_part_2(input: &str) -> u32 {
     input
         .lines()
         .map(|line| {
-            let chars = line.chars().collect::<Vec<char>>();
-            let line_length = line.len();
-            let mut all_numbers: Vec<u32> = vec![0; line_length];
-            for (i, char) in chars.iter().enumerate() {
-                if char.is_numeric() {
-                    all_numbers[i] = char.to_digit(10).unwrap();
-                }
-            }
-            for s in 3..=5 {
-                let mut i = 0;
-                let mut j = i + s;
-                while j <= line_length {
-                    let word: String = chars[i..j].into_iter().collect();
-                    let n = match word.as_str() {
-                        "one" => 1,
-                        "two" => 2,
-                        "three" => 3,
-                        "four" => 4,
-                        "five" => 5,
-                        "six" => 6,
-                        "seven" => 7,
-                        "eight" => 8,
-                        "nine" => 9,
-                        _ => 0,
-                    };
-                    if n > 0 {
-                        all_numbers[i] = n;
+            let n = [
+                "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "1", "2",
+                "3", "4", "5", "6", "7", "8", "9",
+            ];
+            let mut first = 0;
+            let mut last = 0;
+            let mut first_index = usize::MAX;
+            let mut last_index = usize::MIN;
+
+            for x in n {
+                let a = match x {
+                    "one" | "1" => 1,
+                    "two" | "2" => 2,
+                    "three" | "3" => 3,
+                    "four" | "4" => 4,
+                    "five" | "5" => 5,
+                    "six" | "6" => 6,
+                    "seven" | "7" => 7,
+                    "eight" | "8" => 8,
+                    "nine" | "9" => 9,
+                    _ => 0,
+                };
+                if let Some(p) = line.find(x) {
+                    if first_index > p {
+                        first_index = p;
+                        first = a;
                     }
-                    i += 1;
-                    j += 1;
+                }
+                if let Some(p) = line.rfind(x) {
+                    if last_index <= p {
+                        last_index = p;
+                        last = a;
+                    }
                 }
             }
-            all_numbers = all_numbers.into_iter().filter(|x| x > &0).collect();
-            let x = all_numbers[0] * 10 + all_numbers[all_numbers.len() - 1];
-            x
+            first * 10 + last
         })
         .sum()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_process_part_2() {
+        let input = include_str!("../../inputs/day01_sample_02.txt");
+        assert_eq!(process_part_2(input), 6);
+    }
 }
