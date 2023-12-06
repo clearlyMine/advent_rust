@@ -15,13 +15,19 @@ fn main() {
 }
 
 fn process_part_1(input: &str) -> usize {
-    let lines = input.lines().collect::<Vec<_>>();
-    let times = lines[0][5..]
+    let mut lines = input.lines();
+    let times = lines
+        .next()
+        .unwrap()
+        .trim_start_matches("Time:")
         .trim()
         .split_whitespace()
         .map(|t| t.parse::<usize>().unwrap());
 
-    let distances: Vec<usize> = lines[1][9..]
+    let distances: Vec<usize> = lines
+        .next()
+        .unwrap()
+        .trim_start_matches("Distance:")
         .trim()
         .split_whitespace()
         .map(|t| t.parse::<usize>().unwrap())
@@ -57,20 +63,20 @@ fn calculate_distance(wait: usize, run_for: usize) -> usize {
 }
 
 fn process_part_2(input: &str) -> usize {
-    let lines = input.lines().collect::<Vec<_>>();
-    let time: usize = lines[0][5..]
-        .trim()
-        .chars()
-        .filter(|&c| !c.is_whitespace())
-        .collect::<String>()
+    let mut lines = input.lines();
+    let time: usize = lines
+        .next()
+        .unwrap()
+        .trim_start_matches("Time:")
+        .replace(' ', "")
         .parse()
         .unwrap();
 
-    let distance: usize = lines[1][9..]
-        .trim()
-        .chars()
-        .filter(|&c| !c.is_whitespace())
-        .collect::<String>()
+    let distance: usize = lines
+        .next()
+        .unwrap()
+        .trim_start_matches("Distance:")
+        .replace(' ', "")
         .parse()
         .unwrap();
 
