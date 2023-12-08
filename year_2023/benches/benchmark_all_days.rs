@@ -14,9 +14,9 @@ fn criterion_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("10 samples");
     group.sample_size(10);
     group.sampling_mode(criterion::SamplingMode::Flat);
-    for i in 1..=1 {
-        group.bench_function(format!("Day {}", i), |b| {
-            b.iter(|| run_day(format!("day{}", i).as_str()))
+    for i in 1..=25 {
+        group.bench_function(format!("Day {:02}", i), |b| {
+            b.iter(|| run_day(format!("day{:02}", i).as_str()))
         });
     }
     group.finish();
