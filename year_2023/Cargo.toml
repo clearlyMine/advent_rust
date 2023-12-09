@@ -20,6 +20,9 @@ criterion = { version = "0.5.1", features = ["html_reports"] }
 name = "benchmark_all_days"
 harness = false
 
+[[bench]]
+name = "benchmark_day_09"
+harness = false
 
 [[bin]]
 name = "main"
