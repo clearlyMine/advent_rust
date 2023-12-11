@@ -1,6 +1,9 @@
 # Performance
 | Day | Time (Part 1) | Rank (Part 1) | Time (Part 2) | Rank (Part 2) | Remarks |
 |----:|--------------:|--------------:|--------------:|--------------:|---------|
+|11   | 01:07:32      | 7,555         | 01:28:59      | 7,108         | Copied the corrected sample and wasted a very long time trying to get the correct answer. For part 2 at first I tried actually increasing the grid size instead of using math, then came up with the math based solution |
+| 10  | 01:10:58      | 5,040         | 06:04:34      | 7,878         | Part 2 was rough, even after figuring out that shoelace algorithm could be used I wasted way too long in coming up with another kind of solution |
+| 9   | 00:54:36      | 8,440         | 01:27:23      | 9,634         ||
 | 8   | 00:20:05      | 5,804         | 01:00:24      | 4,773         | Wasted time in finding a brute-force solution rather that an LCM for Part 2|
 | 7   | 01:20:25      | 8,839         | 02:12:35      | 9,055         ||
 | 6   | 00:20:45      | 6,955         | 00:31:07      | 7,393         ||
