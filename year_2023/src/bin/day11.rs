@@ -18,68 +18,67 @@ fn main() {
     println!("Time: {}μs", time_start.elapsed().as_micros());
 }
 
-fn process_part_1(input: &str) -> usize {
-    let galaxies = parse_galaxies(input, 2);
-    let mut total = 0;
+fn process_part_1(input: &str) -> u32 {
+    let galaxies = &parse_galaxies(input, 2);
 
-    for (i, gal) in galaxies.clone().into_iter().enumerate() {
-        for next_gal in &galaxies[i + 1..] {
-            total += get_manhattan_distance(gal, *next_gal);
-        }
-    }
-    total
+    galaxies
+        .into_iter()
+        .enumerate()
+        .fold(0, |mut acc, (i, gal)| {
+            for next_gal in &galaxies[i + 1..] {
+                acc += gal.manhattan_distance(next_gal);
+            }
+            acc
+        })
 }
 
-fn process_part_2(input: &str, expansion: usize) -> usize {
-    let galaxies = parse_galaxies(input, expansion);
-    let mut total = 0;
+fn process_part_2(input: &str, expansion: u32) -> u64 {
+    let galaxies = &parse_galaxies(input, expansion);
 
-    for (i, gal) in galaxies.clone().into_iter().enumerate() {
-        for next_gal in &galaxies[i + 1..] {
-            total += get_manhattan_distance(gal, *next_gal);
-        }
-    }
-    total
+    galaxies
+        .into_iter()
+        .enumerate()
+        .fold(0, |mut acc, (i, gal)| {
+            for next_gal in &galaxies[i + 1..] {
+                acc += gal.manhattan_distance(next_gal) as u64;
+            }
+            acc
+        })
 }
 
-fn get_manhattan_distance(first: Coord, second: Coord) -> usize {
-    first.row.abs_diff(second.row) + first.col.abs_diff(second.col)
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone)]
 struct Coord {
-    row: usize,
-    col: usize,
+    row: u32,
+    col: u32,
 }
 
 impl Coord {
-    fn new(row: usize, col: usize) -> Coord {
+    fn new(row: u32, col: u32) -> Coord {
         Coord { row, col }
+    }
+
+    fn manhattan_distance(&self, other: &Coord) -> u32 {
+        self.row.abs_diff(other.row) + self.col.abs_diff(other.col)
     }
 }
 
-fn parse_grid(input: &str) -> Vec<Vec<char>> {
+fn parse_grid(input: &str) -> (Vec<Vec<char>>, Vec<Coord>) {
     let lines = input.lines().collect_vec();
     let mut grid: Vec<Vec<char>> = vec![vec!['.'; lines[0].len()]; lines.len()];
-    let _ = lines.iter().enumerate().for_each(|(row, line)| {
+    let mut galaxies: Vec<Coord> = vec![];
+    lines.iter().enumerate().for_each(|(row, line)| {
         line.chars().enumerate().for_each(|(col, char)| {
-            grid[row][col] = char;
+            if char == '#' {
+                grid[row][col] = char;
+                galaxies.push(Coord::new(row as u32, col as u32));
+            }
         });
     });
-    grid
+    (grid, galaxies)
 }
 
-fn parse_galaxies(input: &str, expansion: usize) -> Vec<Coord> {
-    let grid = parse_grid(input);
-    let mut galaxies: Vec<Coord> = vec![];
-
-    grid.iter().enumerate().for_each(|(row, line)| {
-        line.iter().enumerate().for_each(|(col, char)| {
-            if char == &'#' {
-                galaxies.push(Coord::new(row, col));
-            }
-        })
-    });
+fn parse_galaxies(input: &str, expansion: u32) -> Vec<Coord> {
+    let (grid, mut galaxies) = parse_grid(input);
 
     let empty_rows = grid
         .clone()
@@ -89,12 +88,12 @@ fn parse_galaxies(input: &str, expansion: usize) -> Vec<Coord> {
             if line.iter().any(|char| char == &'#') {
                 None
             } else {
-                Some(row)
+                Some(row as u32)
             }
         })
-        .collect_vec();
+        .collect::<Vec<u32>>();
 
-    let mut empty_cols: Vec<usize> = vec![];
+    let mut empty_cols: Vec<u32> = vec![];
     for col in 0..grid[0].len() {
         let mut empty_col = true;
         for row in 0..grid.len() {
@@ -104,14 +103,14 @@ fn parse_galaxies(input: &str, expansion: usize) -> Vec<Coord> {
             }
         }
         if empty_col {
-            empty_cols.push(col);
+            empty_cols.push(col as u32);
         }
     }
 
     galaxies.iter_mut().for_each(|gal| {
         let (row, col) = (gal.row, gal.col);
-        let rows_added = empty_rows.iter().filter(|r| r < &&row).count() * (expansion - 1);
-        let cols_added = empty_cols.iter().filter(|c| c < &&col).count() * (expansion - 1);
+        let rows_added = empty_rows.iter().filter(|r| r < &&row).count() as u32 * (expansion - 1);
+        let cols_added = empty_cols.iter().filter(|c| c < &&col).count() as u32 * (expansion - 1);
         *gal = Coord::new(row + rows_added, col + cols_added);
     });
 
@@ -144,6 +143,6 @@ mod tests {
 
     #[test]
     fn part_2_input() {
-        assert_eq!(process_part_2(INPUT, 1_000_000), 726820169514)
+        assert_eq!(process_part_2(INPUT, 1_000_000), 726_820_169_514)
     }
 }
