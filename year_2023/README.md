@@ -1,6 +1,7 @@
 # Performance
 | Day | Time (Part 1) | Rank (Part 1) | Time (Part 2) | Rank (Part 2) | Remarks |
 |----:|--------------:|--------------:|--------------:|--------------:|---------|
+| 13  | 02:16:01      | 7,732         | 02:46:52      | 6,380         | Naively assumed that only one end will have to be ignored (which works for the sample) and wasted a long time in trying to get the correct solution for the input |
 | 12  | 01:04:34      | 4,471         | 07:24:32      | 6,309         | WTF even is dynamic programming 🙃🙃 |
 | 11  | 01:07:32      | 7,555         | 01:28:59      | 7,108         | Copied the corrected sample and wasted a very long time trying to get the correct answer. For part 2 at first I tried actually increasing the grid size instead of using math, then came up with the math based solution |
 | 10  | 01:10:58      | 5,040         | 06:04:34      | 7,878         | Part 2 was rough, even after figuring out that shoelace algorithm could be used I wasted way too long in coming up with another kind of solution |
