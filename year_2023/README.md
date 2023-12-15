@@ -1,6 +1,7 @@
 # Performance
 | Day | Time (Part 1) | Rank (Part 1) | Time (Part 2) | Rank (Part 2) | Remarks |
 |----:|--------------:|--------------:|--------------:|--------------:|---------|
+| 15  | 00:14:20      | 4,729         | 00:50:05      | 4,305         | Part 1: Kinda disappointed by how long it took me. Only thing that me tripped was not using .trim() on the input as it contained a return(\n) at the end. Part 2: That was one verbose explanation for a fairly simple problem. Only thing that I misread was the HASH algorithm was to be run only on the label and not the whole string. |
 | 14  | 00:19:56      | 3,202         | 01:42:53      | 4,265         | Part 1 was fairly simple and I just used math instead of modifying the grid. Part 2: I figured out that there has to be a cycle but it took me a substantial amount of time to figure out how to manage the cache. |
 | 13  | 02:16:01      | 7,732         | 02:46:52      | 6,380         | Naively assumed that only one end will have to be ignored (which works for the sample) and wasted a long time in trying to get the correct solution for the input. |
 | 12  | 01:04:34      | 4,471         | 07:24:32      | 6,309         | WTF even is dynamic programming 🙃🙃 |
