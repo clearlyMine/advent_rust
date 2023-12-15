@@ -21,13 +21,7 @@ fn process_part_1(input: &str) -> usize {
     input
         .trim()
         .split(",")
-        .map(|s| {
-            s.chars().fold(0, |acc, c| {
-                let mut acc = acc + c as usize;
-                acc *= 17;
-                acc % 256
-            })
-        })
+        .map(|s| s.chars().fold(0, |acc, c| (acc + c as usize) * 17 % 256))
         .sum()
 }
 
@@ -66,19 +60,13 @@ fn find_box_entries(input: &str) -> Vec<Vec<(String, usize)>> {
 
             if let Some(element) = boxes[box_num].iter_mut().find(|(lb, _)| lb == label) {
                 *element = (label.to_string(), focal_length);
-                // println!(
-                //     "replacing {}:{} with {}:{} in box:{}",
-                //     x.0, x.1, label, focal_length, box_num
-                // );
             } else {
-                // println!("adding {}:{} in box:{}", label, focal_length, box_num);
                 boxes[box_num].push((label.to_string(), focal_length));
             }
         } else if s.contains("-") {
             let (label, _focal_length) = s.split_once("-").unwrap();
             let box_num = calculate_box_num(label);
             if let Some(index) = boxes[box_num].iter().position(|(lb, _)| lb == label) {
-                // println!("removing {}:{} from box:{}", label, _focal_length, box_num);
                 boxes[box_num].remove(index);
             }
         }
@@ -88,11 +76,9 @@ fn find_box_entries(input: &str) -> Vec<Vec<(String, usize)>> {
 
 #[inline]
 fn calculate_box_num(label: &str) -> usize {
-    label.chars().fold(0, |acc, c| {
-        let mut acc = acc + c as usize;
-        acc *= 17;
-        acc % 256
-    })
+    label
+        .chars()
+        .fold(0, |acc, c| (acc + c as usize) * 17 % 256)
 }
 
 #[cfg(test)]
