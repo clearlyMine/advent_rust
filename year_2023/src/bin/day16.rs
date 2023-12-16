@@ -1,7 +1,8 @@
-use itertools::Itertools;
-use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
+use std::collections::HashSet;
 use std::hash::Hash;
-use std::{collections::HashSet, time::Instant};
+use std::sync::Arc;
+use std::thread;
+use std::time::Instant;
 
 #[allow(dead_code)]
 const INPUT: &'static str = include_str!("../../inputs/day16.txt");
@@ -27,55 +28,49 @@ fn process_part_1(input: &str) -> usize {
 
 fn process_part_2(input: &str) -> usize {
     let grid = parse_grid(input);
-
     let height = grid.len();
     let width = grid[0].len();
-    let mut max_energised = (0..height)
-        .par_bridge()
-        .into_par_iter()
-        .map(|row| {
-            let mut x: Vec<usize> = vec![];
-            for (col, direction) in [(0, Direction::Right), (width - 1, Direction::Left)] {
+    let grid = Arc::new(grid);
+
+    let mut handles = vec![];
+    let mut results = vec![];
+
+    for row in 0..height {
+        for (col, direction) in [(0, Direction::Right), (width - 1, Direction::Left)] {
+            let grid = Arc::clone(&grid);
+            let handle = thread::spawn(move || {
                 let start_position = Coord::new(row, col);
-                let mut beaming: HashSet<Coord> = HashSet::new();
-                beaming.insert(start_position);
-                x.push(get_beaming_count(&grid, start_position, direction));
-            }
-            x
-        })
-        .flatten()
-        .max()
-        .unwrap_or(0);
-    max_energised = max_energised.max(
-        (0..width)
-            .par_bridge()
-            .into_par_iter()
-            .map(|col| {
-                let mut x: Vec<usize> = vec![];
-                for (row, direction) in [(0, Direction::Down), (height - 1, Direction::Up)] {
-                    let start_position = Coord::new(row, col);
+                get_beaming_count(&grid, start_position, direction)
+            });
+            handles.push(handle);
+        }
+    }
+    for col in 0..width {
+        for (row, direction) in [(0, Direction::Down), (height - 1, Direction::Up)] {
+            let grid = Arc::clone(&grid);
+            let handle = thread::spawn(move || {
+                let start_position = Coord::new(row, col);
+                get_beaming_count(&grid, start_position, direction)
+            });
+            handles.push(handle);
+        }
+    }
 
-                    let mut beaming: HashSet<Coord> = HashSet::new();
-                    beaming.insert(start_position);
-
-                    x.push(get_beaming_count(&grid, start_position, direction));
-                }
-                x
-            })
-            .flatten()
-            .max()
-            .unwrap_or(0),
-    );
-    max_energised
+    for handle in handles {
+        results.push(handle.join().unwrap());
+    }
+    *results.iter().max().unwrap()
 }
 
 fn get_beaming_count(grid: &Vec<Vec<char>>, position: Coord, direction: Direction) -> usize {
-    let mut queue: Vec<(Coord, Direction)> = vec![];
-    queue.push((position, direction));
+    let mut queue: Vec<(Coord, Direction)> = vec![(position, direction)];
+
     let width = grid[0].len();
     let height = grid.len();
+
     let mut visited: HashSet<(Coord, Direction)> = HashSet::new();
     visited.insert((position, direction));
+
     while let Some((position, direction)) = queue.pop() {
         let new_directions: Vec<Direction> = match grid[position.row][position.col] {
             '/' => match direction {
@@ -201,7 +196,7 @@ fn print_beamed_grid(beamed: &HashSet<Coord>, width: usize, height: usize) {
 }
 
 fn parse_grid(input: &str) -> Vec<Vec<char>> {
-    let lines = input.lines().collect_vec();
+    let lines = input.lines().collect::<Vec<&str>>();
     let mut grid: Vec<Vec<char>> = vec![vec!['.'; lines[0].len()]; lines.len()];
     lines.iter().enumerate().for_each(|(row, line)| {
         for (col, char) in line.chars().enumerate() {
