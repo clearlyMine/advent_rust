@@ -1,6 +1,7 @@
 use itertools::Itertools;
-use std::hash::{Hash, Hasher};
-use std::{collections::HashMap, collections::HashSet, time::Instant};
+use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
+use std::hash::Hash;
+use std::{collections::HashSet, time::Instant};
 
 #[allow(dead_code)]
 const INPUT: &'static str = include_str!("../../inputs/day16.txt");
@@ -21,149 +22,111 @@ fn main() {
 
 fn process_part_1(input: &str) -> usize {
     let grid = parse_grid(input);
-    let mut beaming: HashSet<Coord> = HashSet::new();
-
-    let start_position = Coord::new(0, 0);
-    beaming.insert(start_position);
-    find_all_beaming(
-        &grid,
-        start_position,
-        Direction::Right,
-        &mut beaming,
-        &mut HashSet::new(),
-    );
-    // dbg!(beaming.clone());
-    beaming.len()
+    get_beaming_count(&grid, Coord::new(0, 0), Direction::Right)
 }
 
 fn process_part_2(input: &str) -> usize {
     let grid = parse_grid(input);
 
-    let mut max_energised = 0;
     let height = grid.len();
     let width = grid[0].len();
-    for row in 0..height {
-        for (col, direction) in [(0, Direction::Right), (width - 1, Direction::Left)] {
-            let start_position = Coord::new(row, col);
-            let mut beaming: HashSet<Coord> = HashSet::new();
-            beaming.insert(start_position);
+    let mut max_energised = (0..height)
+        .par_bridge()
+        .into_par_iter()
+        .map(|row| {
+            let mut x: Vec<usize> = vec![];
+            for (col, direction) in [(0, Direction::Right), (width - 1, Direction::Left)] {
+                let start_position = Coord::new(row, col);
+                let mut beaming: HashSet<Coord> = HashSet::new();
+                beaming.insert(start_position);
+                x.push(get_beaming_count(&grid, start_position, direction));
+            }
+            x
+        })
+        .flatten()
+        .max()
+        .unwrap_or(0);
+    max_energised = max_energised.max(
+        (0..width)
+            .par_bridge()
+            .into_par_iter()
+            .map(|col| {
+                let mut x: Vec<usize> = vec![];
+                for (row, direction) in [(0, Direction::Down), (height - 1, Direction::Up)] {
+                    let start_position = Coord::new(row, col);
 
-            find_all_beaming(
-                &grid,
-                start_position,
-                direction,
-                &mut beaming,
-                &mut HashSet::new(),
-            );
-            max_energised = max_energised.max(beaming.len());
-        }
-    }
-    for col in 0..width {
-        for (row, direction) in [(0, Direction::Down), (height - 1, Direction::Up)] {
-            let start_position = Coord::new(row, col);
+                    let mut beaming: HashSet<Coord> = HashSet::new();
+                    beaming.insert(start_position);
 
-            let mut beaming: HashSet<Coord> = HashSet::new();
-            beaming.insert(start_position);
-
-            find_all_beaming(
-                &grid,
-                start_position,
-                direction,
-                &mut beaming,
-                &mut HashSet::new(),
-            );
-            max_energised = max_energised.max(beaming.len());
-        }
-    }
+                    x.push(get_beaming_count(&grid, start_position, direction));
+                }
+                x
+            })
+            .flatten()
+            .max()
+            .unwrap_or(0),
+    );
     max_energised
 }
 
-fn find_all_beaming(
-    grid: &Vec<Vec<char>>,
-    position: Coord,
-    direction: Direction,
-    beaming: &mut HashSet<Coord>,
-    cache: &mut HashSet<(Coord, Direction)>,
-) {
-    if cache.contains(&(position, direction)) {
-        return;
-    }
+fn get_beaming_count(grid: &Vec<Vec<char>>, position: Coord, direction: Direction) -> usize {
+    let mut queue: Vec<(Coord, Direction)> = vec![];
+    queue.push((position, direction));
     let width = grid[0].len();
     let height = grid.len();
-    let mut position = position;
-    let mut direction = direction;
-    let mut cur = grid[position.row][position.col];
-    loop {
-        // dbg!(cur);
-        match cur {
+    let mut visited: HashSet<(Coord, Direction)> = HashSet::new();
+    visited.insert((position, direction));
+    while let Some((position, direction)) = queue.pop() {
+        let new_directions: Vec<Direction> = match grid[position.row][position.col] {
             '/' => match direction {
-                Direction::Right => direction = Direction::Up,
-                Direction::Left => direction = Direction::Down,
-                Direction::Up => direction = Direction::Right,
-                Direction::Down => direction = Direction::Left,
+                Direction::Right => vec![Direction::Up],
+                Direction::Left => vec![Direction::Down],
+                Direction::Up => vec![Direction::Right],
+                Direction::Down => vec![Direction::Left],
             },
             '\\' => match direction {
-                Direction::Right => direction = Direction::Down,
-                Direction::Left => direction = Direction::Up,
-                Direction::Up => direction = Direction::Left,
-                Direction::Down => direction = Direction::Right,
+                Direction::Right => vec![Direction::Down],
+                Direction::Left => vec![Direction::Up],
+                Direction::Up => vec![Direction::Left],
+                Direction::Down => vec![Direction::Right],
             },
             '-' => match direction {
-                Direction::Up | Direction::Down => {
-                    // println!("Splitting at {:?}", position);
-                    // println!("Right split");
-                    find_all_beaming(grid, position, Direction::Right, beaming, cache);
-                    // println!("Left split at {:?}", position);
-                    find_all_beaming(grid, position, Direction::Left, beaming, cache);
-                    break;
-                }
-                _ => {}
+                Direction::Up | Direction::Down => vec![Direction::Right, Direction::Left],
+                _ => vec![direction],
             },
             '|' => match direction {
-                Direction::Left | Direction::Right => {
-                    // println!("Splitting at {:?}", position);
-                    // println!("Up split");
-                    find_all_beaming(grid, position, Direction::Up, beaming, cache);
-                    // println!("Down split at {:?}", position);
-                    find_all_beaming(grid, position, Direction::Down, beaming, cache);
-                    break;
-                }
-                _ => {}
+                Direction::Left | Direction::Right => vec![Direction::Up, Direction::Down],
+                _ => vec![direction],
             },
-            '.' => {}
+            '.' => vec![direction],
             _ => panic! {"WTF"},
-        }
-        // dbg!(direction);
-        let p = match direction {
-            Direction::Up => position.get_north(),
-            Direction::Left => position.get_west(),
-            Direction::Down => position.get_south(),
-            Direction::Right => position.get_east(),
         };
-        // dbg!(p);
-        if let Some(new_position) = p {
-            if new_position.row < height && new_position.col < width {
-                cur = grid[new_position.row][new_position.col];
-                beaming.insert(new_position);
-                position = new_position;
-                if cache.contains(&(position, direction)) {
-                    // println!("Already been here");
-                    // println!("-------------------\n\n");
-                    break;
+        // dbg!(new_directions.clone());
+        for direction in new_directions {
+            let p = match direction {
+                Direction::Up => position.get_north(),
+                Direction::Left => position.get_west(),
+                Direction::Down => position.get_south(),
+                Direction::Right => position.get_east(),
+            };
+            // dbg!(p);
+            if let Some(new_position) = p {
+                if new_position.row < height && new_position.col < width {
+                    if !visited.contains(&(new_position, direction)) {
+                        visited.insert((new_position, direction));
+                        queue.push((new_position, direction));
+                    }
                 }
-                cache.insert((position, direction));
-            } else {
-                // println!("Beam is out of grid");
-                // println!("-------------------\n\n");
-                break;
             }
-        } else {
-            // println!("Beam is out of grid");
-            // println!("-------------------\n\n");
-            break;
         }
         // print_beamed_grid(&beaming, width, height);
     }
+    // dbg!(visited.clone());
+    visited
+        .into_iter()
+        .map(|(p, _)| p)
+        .collect::<HashSet<Coord>>()
+        .len()
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -179,6 +142,7 @@ struct Coord {
     row: usize,
     col: usize,
 }
+
 impl Coord {
     fn new(row: usize, col: usize) -> Coord {
         Coord { row, col }
@@ -219,53 +183,6 @@ impl Coord {
     }
 }
 
-#[derive(PartialEq, Eq, Hash)]
-struct Grid(Vec<Vec<Land>>);
-
-struct Row(Vec<Land>);
-
-impl Hash for Row {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.0.hash(state);
-    }
-}
-
-fn tilt_east(grid: &mut Vec<Vec<Land>>, height: usize, width: usize) {
-    for row in 0..height {
-        let row_contents = &*grid[row].clone();
-        let mut current_right = width - 1;
-        for (i, char) in row_contents.iter().rev().enumerate() {
-            let col = width - i - 1;
-            match char {
-                Land::MovableRock => {
-                    grid[row][col] = Land::Ground;
-                    grid[row][current_right] = Land::MovableRock;
-                    if current_right == 0 {
-                        break;
-                    }
-                    current_right -= 1;
-                }
-                Land::ImmovableRock => {
-                    if col == 0 {
-                        break;
-                    }
-                    current_right = col - 1;
-                }
-                _ => {}
-            }
-        }
-    }
-    // print_grid(&grid);
-}
-
-fn calculate_load_on_north_beam(grid: &[Vec<Land>]) -> usize {
-    let height = grid.len();
-    grid.iter()
-        .enumerate()
-        .map(|(i, row)| row.iter().filter(|c| c == &&Land::MovableRock).count() * (height - i))
-        .sum()
-}
-
 #[allow(dead_code)]
 fn print_beamed_grid(beamed: &HashSet<Coord>, width: usize, height: usize) {
     let mut f: String = "".to_string();
@@ -281,34 +198,6 @@ fn print_beamed_grid(beamed: &HashSet<Coord>, width: usize, height: usize) {
         f = format!("{}\n", f);
     }
     println!("{}", f);
-}
-
-#[allow(dead_code)]
-fn print_grid(grid: &Vec<Vec<Land>>) {
-    let mut f: String = "".to_string();
-    for i in 0..grid.len() {
-        for j in 0..grid[0].len() {
-            let c = match grid[i][j] {
-                Land::Ground => '.',
-                Land::MovableRock => 'O',
-                _ => '#',
-            };
-            f = format!("{}{}", f, c);
-        }
-        f = format!("{}\n", f);
-    }
-    println!("{}", f);
-}
-
-fn get_col(grid: &[Vec<Land>], col: usize) -> Vec<Land> {
-    grid.iter().map(|row| row[col]).collect::<Vec<Land>>()
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
-enum Land {
-    Ground,
-    MovableRock,
-    ImmovableRock,
 }
 
 fn parse_grid(input: &str) -> Vec<Vec<char>> {
@@ -331,21 +220,21 @@ mod tests {
 
     #[test]
     fn part_1_sample() {
-        assert_eq!(process_part_1(SAMPLE), 0)
+        assert_eq!(process_part_1(SAMPLE), 46)
     }
 
     #[test]
     fn part_1_input() {
-        assert_eq!(process_part_1(INPUT), 0)
+        assert_eq!(process_part_1(INPUT), 6902)
     }
 
     #[test]
     fn part_2_sample() {
-        assert_eq!(process_part_2(SAMPLE), 0)
+        assert_eq!(process_part_2(SAMPLE), 51)
     }
 
     #[test]
     fn part_2_input() {
-        assert_eq!(process_part_2(INPUT), 0)
+        assert_eq!(process_part_2(INPUT), 7697)
     }
 }
