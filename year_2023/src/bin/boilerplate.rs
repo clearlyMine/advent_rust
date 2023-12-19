@@ -43,18 +43,22 @@ struct Coord {
 }
 
 impl Coord {
-    fn get_south(&self) -> Coord {
-        Coord {
-            row: self.row + 1,
-            col: self.col,
-        }
+    fn new(row: usize, col: usize) -> Coord {
+        Coord { row, col }
     }
 
-    fn get_east(&self) -> Coord {
-        Coord {
+    fn get_south(&self) -> Option<Coord> {
+        Some(Coord {
+            row: self.row + 1,
+            col: self.col,
+        })
+    }
+
+    fn get_east(&self) -> Option<Coord> {
+        Some(Coord {
             row: self.row,
             col: self.col + 1,
-        }
+        })
     }
 
     fn get_west(&self) -> Option<Coord> {
@@ -75,6 +79,23 @@ impl Coord {
             row: self.row - 1,
             col: self.col,
         })
+    }
+
+    fn get_all_neighbours(&self) -> Vec<Coord> {
+        let mut out: Vec<Coord> = vec![];
+        if let Some(north) = self.get_north() {
+            out.push(north);
+        }
+        if let Some(south) = self.get_south() {
+            out.push(south);
+        }
+        if let Some(west) = self.get_west() {
+            out.push(west);
+        }
+        if let Some(east) = self.get_east() {
+            out.push(east);
+        }
+        out
     }
 }
 
@@ -141,19 +162,18 @@ fn parse_line(input: &str) -> IResult<&str, [HashSet<u32>; 2]> {
     Ok(("", [winning_numbers, our_numbers]))
 }
 
-fn parse_grid(input: &str) -> Vec<Vec<Land>> {
+fn parse_grid(input: &str) -> Vec<Vec<char>> {
     let lines = input.lines().collect_vec();
-    let mut grid: Vec<Vec<Land>> = vec![vec![Land::Ground; lines[0].len()]; lines.len()];
+    let mut grid: Vec<Vec<char>> = vec![vec!['.'; lines[0].len()]; lines.len()];
     lines.iter().enumerate().for_each(|(row, line)| {
         for (col, char) in line.chars().enumerate() {
             if char == '.' {
                 continue;
             }
-            grid[row][col] = match char {
-                '#' => Land::ImmovableRock,
-                'O' => Land::MovableRock,
-                _ => panic!("WTF"),
-            }
+            // grid[row][col] = match char {
+            //     _ => panic!("WTF"),
+            // }
+            grid[row][col] = char;
         }
     });
     grid
@@ -192,42 +212,6 @@ fn parse_game(input: &str) -> IResult<&str, Game> {
 
 fn parse_number(input: &str) -> IResult<&str, u32> {
     map_res(digit1, |s: &str| s.parse::<u32>())(input)
-}
-
-fn tilt_east(grid: &mut Vec<Vec<Land>>, height: usize, width: usize) {
-    for row in 0..height {
-        let row_contents = &*grid[row].clone();
-        let mut current_right = width - 1;
-        for (i, char) in row_contents.iter().rev().enumerate() {
-            let col = width - i - 1;
-            match char {
-                Land::MovableRock => {
-                    grid[row][col] = Land::Ground;
-                    grid[row][current_right] = Land::MovableRock;
-                    if current_right == 0 {
-                        break;
-                    }
-                    current_right -= 1;
-                }
-                Land::ImmovableRock => {
-                    if col == 0 {
-                        break;
-                    }
-                    current_right = col - 1;
-                }
-                _ => {}
-            }
-        }
-    }
-    // print_grid(&grid);
-}
-
-fn calculate_load_on_north_beam(grid: &[Vec<Land>]) -> usize {
-    let height = grid.len();
-    grid.iter()
-        .enumerate()
-        .map(|(i, row)| row.iter().filter(|c| c == &&Land::MovableRock).count() * (height - i))
-        .sum()
 }
 
 #[allow(dead_code)]
