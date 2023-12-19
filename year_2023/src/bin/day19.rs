@@ -23,30 +23,30 @@ fn main() {
 }
 
 fn process_part_1(input: &str) -> usize {
-    let (operations, parts) = input.split_once("\n\n").unwrap();
-    let (_, operations) = parse_operations(operations).unwrap();
-    // dbg!(operations.clone());
+    let (rules, parts) = input.split_once("\n\n").unwrap();
+
+    let (_, rules) = parse_rules(rules).unwrap();
     let (_, parts) = parse_parts(parts).unwrap();
-    // dbg!(parts.clone());
+
     let mut accepted_parts_sum = 0;
     for part in parts {
-        let mut curr_operation = "in".to_string();
-        while curr_operation != "A" && curr_operation != "R" {
-            if let Some(o) = operations.get(&curr_operation) {
+        let mut curr_rule = "in".to_string();
+        while curr_rule != "A" && curr_rule != "R" {
+            if let Some(o) = rules.get(&curr_rule) {
                 for op in o {
                     match op {
-                        OperationType::Destination(val) => {
-                            curr_operation = val.to_string();
+                        RuleType::Destination(val) => {
+                            curr_rule = val.to_string();
                             break;
                         }
-                        OperationType::Operation(op) => {
+                        RuleType::Rule(op) => {
                             let cur_count = part.get(&op.part).unwrap();
                             let op_success = match op.operator {
                                 Operator::LessThan => cur_count < &op.count,
                                 Operator::GreaterThan => cur_count > &op.count,
                             };
                             if op_success {
-                                curr_operation = op.destination.clone();
+                                curr_rule = op.destination.clone();
                                 break;
                             }
                         }
@@ -54,7 +54,7 @@ fn process_part_1(input: &str) -> usize {
                 }
             }
         }
-        if curr_operation == "A" {
+        if curr_rule == "A" {
             accepted_parts_sum += part.into_iter().map(|(_, c)| c).sum::<usize>();
         }
     }
@@ -62,61 +62,54 @@ fn process_part_1(input: &str) -> usize {
 }
 
 fn process_part_2(input: &str) -> usize {
-    let (operations, _) = input.split_once("\n\n").unwrap();
-    let (_, operations) = parse_operations(operations).unwrap();
-    // dbg!(operations.clone());
-    // dbg!(parts.clone());
-    let mut accepted_part_combination = 0;
+    let (rules, _) = input.split_once("\n\n").unwrap();
+    let (_, rules) = parse_rules(rules).unwrap();
+
     let mut accepted_paths = vec![];
-    let mut queue = vec![(OperationType::Destination("in".to_string()), vec![])];
+
+    let mut queue = vec![(RuleType::Destination("in".to_string()), vec![])];
     while let Some((next, constraints)) = queue.pop() {
-        // dbg!(next.clone(), constraints.clone());
-        if next == OperationType::Destination("A".to_string()) {
-            // println!("path accepted");
+        if next == RuleType::Destination("A".to_string()) {
             accepted_paths.push(constraints);
             continue;
         }
-        if next == OperationType::Destination("R".to_string()) {
-            // println!("path rejected");
+        if next == RuleType::Destination("R".to_string()) {
             continue;
         }
         match next {
-            OperationType::Destination(n) => {
+            RuleType::Destination(next) => {
                 let mut inverted_constraints = constraints.clone();
-                for o in operations.get(&n).unwrap() {
-                    match o {
-                        OperationType::Destination(_) => {
-                            queue.push((o.clone(), inverted_constraints.clone()));
+                for rule in rules.get(&next).unwrap() {
+                    match rule {
+                        RuleType::Destination(_) => {
+                            queue.push((rule.clone(), inverted_constraints.clone()));
                         }
-                        OperationType::Operation(oper) => {
-                            queue.push((o.clone(), inverted_constraints.clone()));
-                            let mut oper = oper.clone();
-                            oper.operator = if oper.operator == Operator::LessThan {
-                                oper.count -= 1;
+                        RuleType::Rule(r) => {
+                            queue.push((rule.clone(), inverted_constraints.clone()));
+                            let mut rule = r.clone();
+                            rule.operator = if rule.operator == Operator::LessThan {
+                                rule.count -= 1;
                                 Operator::GreaterThan
                             } else {
-                                oper.count += 1;
+                                rule.count += 1;
                                 Operator::LessThan
                             };
-                            inverted_constraints.push(oper.clone());
+                            inverted_constraints.push(rule.clone());
                         }
                     }
                 }
             }
-            OperationType::Operation(o) => {
+            RuleType::Rule(rule) => {
                 let mut constraints = constraints.clone();
-                //add the new operation to constraint
-                constraints.push(o.clone());
-                let dest = OperationType::Destination(o.destination);
+                constraints.push(rule.clone());
+                let dest = RuleType::Destination(rule.destination);
                 queue.push((dest, constraints.clone()));
             }
         }
-        // dbg!(queue.clone());
     }
-    // dbg!(accepted_paths.clone());
 
+    let mut accepted_part_combination = 0;
     for path in accepted_paths {
-        // dbg!(path.clone());
         let mut min_x = 1;
         let mut max_x = 4000;
         let mut min_m = 1;
@@ -163,22 +156,20 @@ fn process_part_2(input: &str) -> usize {
         if min_x > max_x || min_m > max_m || min_a > max_a || min_s > max_s {
             continue;
         }
-        let t =
+        accepted_part_combination +=
             (max_x - min_x + 1) * (max_m - min_m + 1) * (max_a - min_a + 1) * (max_s - min_s + 1);
-        // dbg!(t);
-        accepted_part_combination += t;
     }
     accepted_part_combination
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-enum OperationType {
-    Operation(Operation),
+enum RuleType {
+    Rule(Rule),
     Destination(String),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-struct Operation {
+struct Rule {
     part: char,
     operator: Operator,
     count: usize,
@@ -191,27 +182,27 @@ enum Operator {
     GreaterThan,
 }
 
-fn parse_operations(input: &str) -> IResult<&str, HashMap<String, Vec<OperationType>>> {
+fn parse_rules(input: &str) -> IResult<&str, HashMap<String, Vec<RuleType>>> {
     let mut out = HashMap::new();
-    let (input, operations) = separated_list1(tag("\n"), parse_operation)(input)?;
-    for (name, o) in operations {
+    let (input, rules) = separated_list1(tag("\n"), parse_rule)(input)?;
+    for (name, o) in rules {
         out.insert(name.to_string(), o);
     }
     Ok((input, out))
 }
 
-fn parse_operation(input: &str) -> IResult<&str, (String, Vec<OperationType>)> {
+fn parse_rule(input: &str) -> IResult<&str, (String, Vec<RuleType>)> {
     let (input, name) = take_till(|c| c == '{')(input)?;
     let (input, _) = tag("{")(input)?;
-    let (input, operations) = take_till(|c| c == '}')(input)?;
-    let (_, operations) = separated_list1(tag(","), parse_operation_type)(operations)?;
+    let (input, rules) = take_till(|c| c == '}')(input)?;
+    let (_, rules) = separated_list1(tag(","), parse_rule_type)(rules)?;
     let (input, _) = tag("}")(input)?;
-    Ok((input, (name.to_string(), operations)))
+    Ok((input, (name.to_string(), rules)))
 }
 
-fn parse_operation_type(input: &str) -> IResult<&str, OperationType> {
+fn parse_rule_type(input: &str) -> IResult<&str, RuleType> {
     if !input.contains(":") {
-        return Ok(("", OperationType::Destination(input.to_string())));
+        return Ok(("", RuleType::Destination(input.to_string())));
     }
     let (input, part) = one_of("xmas")(input)?;
     let (input, operator) = one_of("<>")(input)?;
@@ -223,13 +214,13 @@ fn parse_operation_type(input: &str) -> IResult<&str, OperationType> {
     let (input, count) = digit1(input)?;
     let (input, _) = tag(":")(input)?;
     let (input, destination) = is_not(",}")(input)?;
-    let out = Operation {
+    let out = Rule {
         part,
         count: count.parse().unwrap(),
         operator,
         destination: destination.to_string(),
     };
-    Ok((input, OperationType::Operation(out)))
+    Ok((input, RuleType::Rule(out)))
 }
 
 fn parse_parts(input: &str) -> IResult<&str, Vec<HashMap<char, usize>>> {
