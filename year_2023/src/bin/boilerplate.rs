@@ -16,12 +16,16 @@ const SAMPLE: &'static str = include_str!("../../inputs/day_sample.txt");
 fn main() {
     let time_start = Instant::now();
     let res1 = process_part_1(SAMPLE);
-    println!("Part 1: {:?}", res1);
+    println!("Part 1_sample: {:?}", res1);
+    // let res1 = process_part_1(INPUT);
+    // println!("Part 1: {:?}", res1);
     println!("Time: {}μs", time_start.elapsed().as_micros());
 
     let time_start = Instant::now();
     let res2 = process_part_2(SAMPLE);
-    println!("Part 2: {:?}", res2);
+    println!("Part 2_sample: {:?}", res2);
+    // let res2 = process_part_2(INPUT);
+    // println!("Part 2: {:?}", res2);
     println!("Time: {}μs", time_start.elapsed().as_micros());
 }
 
@@ -236,21 +240,21 @@ mod tests {
 
     #[test]
     fn part_1_sample() {
-        assert_eq!(process_part_1(SAMPLE), 0)
+        assert_eq!(process_part_1(SAMPLE), usize::MAX)
     }
 
     #[test]
     fn part_1_input() {
-        assert_eq!(process_part_1(INPUT), 0)
+        assert_eq!(process_part_1(INPUT), usize::MAX)
     }
 
     #[test]
     fn part_2_sample() {
-        assert_eq!(process_part_2(SAMPLE), 0)
+        assert_eq!(process_part_2(SAMPLE), usize::MAX)
     }
 
     #[test]
     fn part_2_input() {
-        assert_eq!(process_part_2(INPUT), 0)
+        assert_eq!(process_part_2(INPUT), usize::MAX)
     }
 }
