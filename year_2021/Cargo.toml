@@ -1,0 +1,30 @@
+[package]
+name = "advent_of_code_2021"
+version = "0.1.0"
+edition = "2021"
+
+default-run = "main"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+atoi = "2"
+nom = "7"
+itertools = "0.12.0"
+rayon = "1.8.0"
+rand = "0.8"
+
+[dev-dependencies]
+criterion = { version = "0.5.1", features = ["html_reports"] }
+
+[[bench]]
+name = "benchmark_all_days"
+harness = false
+
+[[bench]]
+name = "benchmark_day_09"
+harness = false
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
