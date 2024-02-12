@@ -19,6 +19,9 @@ fn main() {
     let time_start = Instant::now();
     let res2 = process_part_2(SAMPLE);
     println!("Part 2_sample: {:?}", res2);
+    println!("Time: {}μs", time_start.elapsed().as_micros());
+
+    let time_start = Instant::now();
     let res2 = process_part_2(INPUT);
     println!("Part 2: {:?}", res2);
     println!("Time: {}μs", time_start.elapsed().as_micros());
